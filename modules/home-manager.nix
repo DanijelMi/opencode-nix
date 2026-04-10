@@ -7,12 +7,14 @@
 
 let
   cfg = config.programs.opencode-nix;
+  makeOpencodeNix = import ../lib/make-opencode-nix.nix;
   settingsFormat = pkgs.formats.json { };
   defaultConfig = builtins.fromJSON (builtins.readFile ../configs/default.json);
   defaultDcpConfig = builtins.fromJSON (builtins.readFile ../configs/dcp.json);
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.settings;
+  mergedDcpConfig = lib.recursiveUpdate defaultDcpConfig cfg.dcpSettings;
   configFile = settingsFormat.generate "opencode-config.json" mergedConfig;
-  dcpConfigFile = settingsFormat.generate "dcp.json" defaultDcpConfig;
+  dcpConfigFile = settingsFormat.generate "dcp.json" mergedDcpConfig;
   configDir = pkgs.runCommand "opencode-config-dir" { } ''
     mkdir -p $out
     cp ${configFile} $out/config.json
@@ -21,7 +23,7 @@ let
 in
 {
   options.programs.opencode-nix = {
-    enable = lib.mkEnableOption "opencode-nix with context7 MCP pre-configured";
+    enable = lib.mkEnableOption "opencode-nix with context7 MCP, nixos MCP, and DCP pre-configured";
 
     settings = lib.mkOption {
       type = settingsFormat.type;

@@ -63,7 +63,7 @@ This adds `opencode-nix` to your PATH.
 
 ### Extending configuration
 
-You can add additional MCP servers or override settings:
+You can add additional MCP servers, override opencode settings, or adjust DCP behaviour:
 
 ```nix
 programs.opencode-nix = {
@@ -76,25 +76,42 @@ programs.opencode-nix = {
       };
     };
   };
+  dcpSettings = {
+    compress = {
+      maxContextLimit = 200000;
+    };
+  };
 };
 ```
 
-Settings are deep-merged with the default context7 configuration.
+`settings` and `dcpSettings` are each deep-merged with their respective default configurations.
 
 ## Default Configuration
 
-The default config includes context7 MCP for documentation search and the DCP plugin for intelligent context management:
+The default config includes:
+
+- **context7 MCP** — documentation search for any library
+- **nixos MCP** — search NixOS packages, options, and documentation (via `mcp-nixos` in PATH)
+- **opencode-notifier** (`@mohak34/opencode-notifier`) — desktop notifications for long-running tasks
+- **opencode-claude-auth** (`opencode-claude-auth`) — streamlines Claude API authentication via OAuth; no API key required
+- **DCP** (`@tarquinen/opencode-dcp`) — intelligent context compression and pruning
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
+    "@mohak34/opencode-notifier@latest",
+    "opencode-claude-auth@latest",
     "@tarquinen/opencode-dcp@latest"
   ],
   "mcp": {
     "context7": {
       "type": "remote",
       "url": "https://mcp.context7.com/mcp"
+    },
+    "nixos": {
+      "type": "local",
+      "command": ["mcp-nixos"]
     }
   }
 }
@@ -110,7 +127,7 @@ A default DCP configuration is provided at `configs/dcp.json` and installed via 
 - **Purge errors**: enabled — prunes errored tool inputs after 4 turns
 - **Notifications**: detailed chat notifications
 
-Users can override DCP settings at the project level (`.opencode/dcp.json`) or globally (`~/.config/opencode/dcp.jsonc`). See the [DCP documentation](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning#configuration) for all options.
+When using the Home Manager module, DCP settings can be overridden declaratively via the `dcpSettings` option (see above). Alternatively, override at the project level (`.opencode/dcp.json`) or globally (`~/.config/opencode/dcp.jsonc`). See the [DCP documentation](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning#configuration) for all options.
 
 ## Overlay
 
