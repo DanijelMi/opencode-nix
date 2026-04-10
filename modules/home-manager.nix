@@ -36,29 +36,28 @@ in
       };
       description = ''
         Additional opencode configuration settings to merge with the defaults.
-        These will be deep-merged with the base context7 MCP configuration.
+        These will be deep-merged with the base configuration.
+      '';
+    };
+
+    dcpSettings = lib.mkOption {
+      type = settingsFormat.type;
+      default = { };
+      example = {
+        compress = {
+          maxContextLimit = 200000;
+        };
+      };
+      description = ''
+        Additional DCP configuration settings to merge with the defaults.
+        These will be deep-merged with the base DCP configuration from configs/dcp.json.
+        See https://github.com/Opencode-DCP/opencode-dynamic-context-pruning#configuration
+        for all available options.
       '';
     };
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [
-      (pkgs.runCommand "opencode-nix-${pkgs.opencode.version or "unstable"}"
-        {
-          nativeBuildInputs = [ pkgs.makeWrapper ];
-          meta = lib.recursiveUpdate (pkgs.opencode.meta or { }) {
-            description = "OpenCode with context7 MCP and DCP pre-configured";
-            mainProgram = "opencode-nix";
-          };
-        }
-        ''
-                    mkdir -p $out/bin
-          makeWrapper ${lib.getExe pkgs.opencode} $out/bin/opencode-nix \
-                       --set OPENCODE_CONFIG "${configDir}/config.json" \
-                       --set OPENCODE_CONFIG_DIR "${configDir}" \
-                       --prefix PATH : ${lib.makeBinPath [ pkgs.mcp-nixos ]}
-        ''
-      )
-    ];
+    home.packages = [ (makeOpencodeNix { inherit pkgs lib configDir; }) ];
   };
 }

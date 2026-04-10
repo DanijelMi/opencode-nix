@@ -1,5 +1,5 @@
 {
-  description = "OpenCode with context7 MCP pre-configured";
+  description = "OpenCode with context7 MCP, nixos MCP, and DCP pre-configured";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -25,6 +25,7 @@
       ];
       lib = nixpkgs.lib;
       forEachSystem = lib.genAttrs supportedSystems;
+      makeOpencodeNix = import ./lib/make-opencode-nix.nix;
       defaultConfig = builtins.fromJSON (builtins.readFile ./configs/default.json);
       defaultDcpConfig = builtins.fromJSON (builtins.readFile ./configs/dcp.json);
     in
@@ -44,22 +45,7 @@
         in
         {
           default = self.packages.${system}.opencode-nix;
-          opencode-nix =
-            pkgs.runCommand "opencode-nix-${pkgs.opencode.version or "unstable"}"
-              {
-                nativeBuildInputs = [ pkgs.makeWrapper ];
-                meta = lib.recursiveUpdate (pkgs.opencode.meta or { }) {
-                  description = "OpenCode with context7 MCP and DCP pre-configured";
-                  mainProgram = "opencode-nix";
-                };
-              }
-              ''
-                                mkdir -p $out/bin
-                makeWrapper ${lib.getExe pkgs.opencode} $out/bin/opencode-nix \
-                                   --set OPENCODE_CONFIG "${configDir}/config.json" \
-                                   --set OPENCODE_CONFIG_DIR "${configDir}" \
-                                   --prefix PATH : ${lib.makeBinPath [ pkgs.mcp-nixos ]}
-              '';
+          opencode-nix = makeOpencodeNix { inherit pkgs lib configDir; };
         }
       );
 
