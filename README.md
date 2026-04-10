@@ -1,6 +1,6 @@
 # opencode-nix
 
-A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://github.com/upstash/context7) pre-configured.
+A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://github.com/upstash/context7) and [Dynamic Context Pruning](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning) pre-configured.
 
 ## Usage
 
@@ -83,11 +83,14 @@ Settings are deep-merged with the default context7 configuration.
 
 ## Default Configuration
 
-The default config includes context7 MCP for documentation search:
+The default config includes context7 MCP for documentation search and the DCP plugin for intelligent context management:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "@tarquinen/opencode-dcp@latest"
+  ],
   "mcp": {
     "context7": {
       "type": "remote",
@@ -96,6 +99,18 @@ The default config includes context7 MCP for documentation search:
   }
 }
 ```
+
+### DCP Configuration
+
+A default DCP configuration is provided at `configs/dcp.json` and installed via `OPENCODE_CONFIG_DIR`. Key defaults:
+
+- **Compress mode**: `range` — compresses conversation spans into summaries
+- **Permission**: `allow` — no confirmation prompt for compression
+- **Deduplication**: enabled — removes duplicate tool call outputs
+- **Purge errors**: enabled — prunes errored tool inputs after 4 turns
+- **Notifications**: detailed chat notifications
+
+Users can override DCP settings at the project level (`.opencode/dcp.json`) or globally (`~/.config/opencode/dcp.jsonc`). See the [DCP documentation](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning#configuration) for all options.
 
 ## Overlay
 

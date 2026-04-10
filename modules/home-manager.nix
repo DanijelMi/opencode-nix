@@ -9,8 +9,15 @@ let
   cfg = config.programs.opencode-nix;
   settingsFormat = pkgs.formats.json { };
   defaultConfig = builtins.fromJSON (builtins.readFile ../configs/default.json);
+  defaultDcpConfig = builtins.fromJSON (builtins.readFile ../configs/dcp.json);
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.settings;
   configFile = settingsFormat.generate "opencode-config.json" mergedConfig;
+  dcpConfigFile = settingsFormat.generate "dcp.json" defaultDcpConfig;
+  configDir = pkgs.runCommand "opencode-config-dir" { } ''
+    mkdir -p $out
+    cp ${configFile} $out/config.json
+    cp ${dcpConfigFile} $out/dcp.json
+  '';
 in
 {
   options.programs.opencode-nix = {
@@ -40,14 +47,16 @@ in
         {
           nativeBuildInputs = [ pkgs.makeWrapper ];
           meta = lib.recursiveUpdate (pkgs.opencode.meta or { }) {
-            description = "OpenCode with context7 MCP pre-configured";
+            description = "OpenCode with context7 MCP and DCP pre-configured";
             mainProgram = "opencode-nix";
           };
         }
         ''
-          mkdir -p $out/bin
+                    mkdir -p $out/bin
           makeWrapper ${lib.getExe pkgs.opencode} $out/bin/opencode-nix \
-            --set OPENCODE_CONFIG "${configFile}"
+                       --set OPENCODE_CONFIG "${configDir}/config.json" \
+                       --set OPENCODE_CONFIG_DIR "${configDir}" \
+                       --prefix PATH : ${lib.makeBinPath [ pkgs.mcp-nixos ]}
         ''
       )
     ];
