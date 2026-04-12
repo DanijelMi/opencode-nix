@@ -12,7 +12,9 @@
     },
     "nixos": {
       "type": "local",
-      "command": ["mcp-nixos"]
+      "command": [
+        "mcp-nixos"
+      ]
     }
   }
 }

@@ -45,7 +45,8 @@
         in
         {
           default = self.packages.${system}.opencode-nix;
-          opencode-nix = makeOpencodeNix { inherit pkgs lib configDir; };
+          opencode-nix = makeOpencodeNix { inherit pkgs lib configDir; binaryName = "opencode-nix"; };
+          opencode = makeOpencodeNix { inherit pkgs lib configDir; binaryName = "opencode"; };
         }
       );
 

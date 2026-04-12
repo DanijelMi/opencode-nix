@@ -23,7 +23,21 @@ let
 in
 {
   options.programs.opencode-nix = {
-    enable = lib.mkEnableOption "opencode-nix with context7 MCP, nixos MCP, and DCP pre-configured";
+    enable = lib.mkEnableOption "opencode with context7 MCP, nixos MCP, and DCP pre-configured";
+
+    binaryName = lib.mkOption {
+      type = lib.types.enum [
+        "opencode-nix"
+        "opencode"
+      ];
+      default = "opencode-nix";
+      example = "opencode";
+      description = ''
+        The name of the installed binary.
+        Use "opencode-nix" (default) to avoid conflicts with pkgs.opencode if both are installed.
+        Use "opencode" to match the upstream binary name.
+      '';
+    };
 
     settings = lib.mkOption {
       type = settingsFormat.type;
@@ -60,6 +74,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ (makeOpencodeNix { inherit pkgs lib configDir; }) ];
+    home.packages = [ (makeOpencodeNix { inherit pkgs lib configDir; binaryName = cfg.binaryName; }) ];
   };
 }

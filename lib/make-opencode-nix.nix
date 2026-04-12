@@ -4,18 +4,19 @@
   pkgs,
   lib,
   configDir,
+  binaryName ? "opencode-nix",
 }:
-pkgs.runCommand "opencode-nix-${pkgs.opencode.version or "unstable"}"
+pkgs.runCommand "${binaryName}-${pkgs.opencode.version or "unstable"}"
   {
     nativeBuildInputs = [ pkgs.makeWrapper ];
     meta = lib.recursiveUpdate (pkgs.opencode.meta or { }) {
       description = "OpenCode with context7 MCP, nixos MCP, and DCP pre-configured";
-      mainProgram = "opencode-nix";
+      mainProgram = binaryName;
     };
   }
   ''
     mkdir -p $out/bin
-    makeWrapper ${lib.getExe pkgs.opencode} $out/bin/opencode-nix \
+    makeWrapper ${lib.getExe pkgs.opencode} $out/bin/${binaryName} \
       --set OPENCODE_CONFIG "${configDir}/config.json" \
       --set OPENCODE_CONFIG_DIR "${configDir}" \
       --prefix PATH : ${lib.makeBinPath [ pkgs.mcp-nixos ]}
