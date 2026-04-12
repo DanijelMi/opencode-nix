@@ -17,7 +17,7 @@ pkgs.runCommand "${binaryName}-${pkgs.opencode.version or "unstable"}"
   ''
     mkdir -p $out/bin
     makeWrapper ${lib.getExe pkgs.opencode} $out/bin/${binaryName} \
-      --set OPENCODE_CONFIG "${configDir}/config.json" \
-      --set OPENCODE_CONFIG_DIR "${configDir}" \
+      --set-default OPENCODE_CONFIG "${configDir}/config.json" \
+      --set-default OPENCODE_CONFIG_DIR "${configDir}" \
       --prefix PATH : ${lib.makeBinPath [ pkgs.mcp-nixos ]}
   ''
