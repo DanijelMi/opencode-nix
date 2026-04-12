@@ -10,6 +10,21 @@ A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://gith
 nix run github:DanijelMi/opencode-nix
 ```
 
+Two package variants are available:
+
+| Package | Binary name | Use when |
+|---|---|---|
+| `opencode-nix` (default) | `opencode-nix` | Both this flake and `pkgs.opencode` are installed |
+| `opencode` | `opencode` | This flake is the only opencode installation |
+
+```bash
+# default (opencode-nix binary)
+nix run github:DanijelMi/opencode-nix
+
+# opencode binary name
+nix run github:DanijelMi/opencode-nix#opencode
+```
+
 ### Dev shell
 
 ```bash
@@ -18,48 +33,77 @@ nix develop github:DanijelMi/opencode-nix
 
 ### Home Manager
 
-Add the flake to your inputs:
+> **Note:** this flake requires `nixpkgs-unstable`. If your system uses a stable channel, pin
+> `nixpkgs` to unstable in your flake inputs as shown below.
+
+**Step 1.** Add the flake input:
 
 ```nix
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    opencode-nix = {
-      url = "github:DanijelMi/opencode-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+inputs = {
+  nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  home-manager = {
+    url = "github:nix-community/home-manager";
+    inputs.nixpkgs.follows = "nixpkgs";
   };
-}
-```
-
-#### Local path (for development)
-
-For fast iteration, use a local path instead:
-
-```nix
-opencode-nix = {
-  url = "path:/home/username/repos/opencode-nix";
-  inputs.nixpkgs.follows = "nixpkgs";
+  opencode-nix = {
+    url = "github:DanijelMi/opencode-nix";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
 };
 ```
 
-Import the module and enable:
+**Step 2.** Pass the module to Home Manager in your flake outputs.
+
+Standalone Home Manager:
 
 ```nix
-{
-  imports = [ inputs.opencode-nix.homeManagerModules.default ];
-
-  programs.opencode-nix = {
-    enable = true;
-  };
-}
+home-manager.lib.homeManagerConfiguration {
+  pkgs = nixpkgs.legacyPackages.x86_64-linux;
+  modules = [
+    opencode-nix.homeManagerModules.default
+    ./home.nix
+  ];
+};
 ```
 
-This adds `opencode-nix` to your PATH.
+NixOS with Home Manager as a module:
+
+```nix
+home-manager.sharedModules = [ inputs.opencode-nix.homeManagerModules.default ];
+```
+
+**Step 3.** Enable in `home.nix`:
+
+```nix
+programs.opencode-nix.enable = true;
+```
+
+This installs the binary as **`opencode-nix`** — run it with:
+
+```bash
+opencode-nix
+```
+
+#### Renaming the binary to `opencode`
+
+If you want to type `opencode` instead, and you don't have `pkgs.opencode` installed separately:
+
+```nix
+programs.opencode-nix = {
+  enable = true;
+  binaryName = "opencode";
+};
+```
+
+> **Note:** `binaryName = "opencode"` will conflict with `pkgs.opencode` if both are installed.
+
+#### Development tip: local path
+
+For fast iteration while modifying this flake locally, use a path input instead of the GitHub URL:
+
+```nix
+opencode-nix.url = "path:/home/username/repos/opencode-nix";
+```
 
 ### Extending configuration
 
@@ -91,7 +135,7 @@ programs.opencode-nix = {
 The default config includes:
 
 - **context7 MCP** — documentation search for any library
-- **nixos MCP** — search NixOS packages, options, and documentation (via `mcp-nixos` in PATH)
+- **nixos MCP** — search NixOS packages, options, and documentation (`mcp-nixos` is bundled automatically)
 - **opencode-notifier** (`@mohak34/opencode-notifier`) — desktop notifications for long-running tasks
 - **opencode-claude-auth** (`opencode-claude-auth`) — streamlines Claude API authentication via OAuth; no API key required
 - **DCP** (`@tarquinen/opencode-dcp`) — intelligent context compression and pruning
