@@ -7,25 +7,29 @@ This document provides guidelines for AI coding agents working in the opencode-n
 This is a Nix flake repository that packages [OpenCode](https://opencode.ai) with [context7 MCP](https://github.com/upstash/context7) pre-configured. It provides:
 - A Nix package wrapper for OpenCode
 - Home Manager module for declarative configuration
-- Default JSON configuration with context7 MCP
+- Default JSONC configuration with context7 MCP
 
 ## Build, Lint, and Test Commands
+
+This project uses a Justfile. Run `just` to see all available commands.
 
 ### Building
 
 Build the default package:
 ```bash
-nix build
+just build
 ```
 
-Build and run directly:
+Build and run in a specific directory:
 ```bash
-nix run
+just run /path/to/project
 ```
 
-Enter development shell:
+### Development
+
+Run opencode-nix with local configs for fast iteration (skips nix build, uses local config files directly):
 ```bash
-nix develop
+just dev /path/to/project
 ```
 
 ### Linting and Formatting
@@ -69,21 +73,28 @@ nix eval .#homeManagerModules.default
 
 #### Testing the opencode-nix Binary
 
-After making changes to `configs/default.json` or other configuration files, test the wrapped binary:
+After making changes to `configs/default.jsonc` or other configuration files, test the wrapped binary:
 
-Build and run directly (fastest):
+Build and run with local configs (fastest iteration):
 ```bash
-nix run
+just dev
 ```
 
-Or build then run separately:
+Or build then run the wrapped binary:
 ```bash
-nix build && ./result/bin/opencode-nix
+just build && just run
 ```
 
 Verify the generated configuration file:
 ```bash
-nix build && cat $(nix eval --raw .#packages.x86_64-linux.default.env.OPENCODE_CONFIG)
+just build && cat $(nix eval --raw .#packages.x86_64-linux.default.env.OPENCODE_CONFIG)
+```
+
+### Updating Dependencies
+
+Update the flake lock file:
+```bash
+just update
 ```
 
 ## Code Style Guidelines
@@ -126,7 +137,7 @@ in
 #### Imports and Paths
 - Use relative paths for internal files: `./modules/home-manager.nix`
 - Use `builtins.readFile` for reading file contents
-- Use `builtins.fromJSON` for parsing JSON files
+- Use `builtins.fromJSON` for parsing JSON/JSONC files (strip comments with `strip-jsonc.nix` first for JSONC)
 
 #### Naming Conventions
 - Use kebab-case for option names: `programs.opencode-nix`
@@ -134,17 +145,19 @@ in
 - Prefix configuration variables with `cfg`: `cfg = config.programs.opencode-nix`
 - Use descriptive names: `settingsFormat`, `configFile`
 
-### JSON Configuration Style
+### JSONC Configuration Style
 
 - Always include `$schema` for validation
 - Use 2-space indentation
 - Keep configuration minimal and focused
 - Use descriptive key names for MCP servers
+- `//` line comments are supported (stripped via `lib/strip-jsonc.nix`)
 
 Example:
-```json
+```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
+  // MCP servers
   "mcp": {
     "server-name": {
       "type": "remote",
@@ -161,7 +174,10 @@ Example:
 ├── flake.nix           # Main flake definition
 ├── flake.lock          # Locked dependencies
 ├── configs/
-│   └── default.json    # Default OpenCode configuration
+│   └── default.jsonc   # Default OpenCode configuration (JSONC with comments)
+├── lib/
+│   ├── make-opencode-nix.nix # Shared package wrapping logic
+│   └── strip-jsonc.nix # JSONC comment stripping helper
 ├── modules/
 │   └── home-manager.nix # Home Manager module
 └── README.md           # User documentation
@@ -215,9 +231,9 @@ Example:
 4. Update README.md with usage example
 
 ### Updating Default Configuration
-1. Edit `configs/default.json`
-2. Validate JSON syntax: `nix-instantiate --parse configs/default.json`
-3. Rebuild to verify: `nix build`
+1. Edit `configs/default.jsonc`
+2. Validate by building: `just build`
+3. Test with `just dev`
 4. Update README.md if adding new features
 
 ### Supporting a New Platform
@@ -230,5 +246,5 @@ Example:
 - This repository has no automated tests - rely on `nix flake check` and manual testing
 - Always test Home Manager module changes with actual Home Manager configuration
 - Keep the flake.nix and home-manager.nix patterns consistent
-- Changes to default.json affect all users - maintain backward compatibility
+- Changes to default.jsonc affect all users - maintain backward compatibility
 - Document breaking changes clearly in commit messages and README updates

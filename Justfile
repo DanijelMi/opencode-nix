@@ -10,9 +10,9 @@ build:
 run dir=".":
     cd "{{dir}}" && nix run "{{justfile_directory()}}"
 
-[doc('Run opencode-nix with local configs for fast iteration')]
+[doc('Run opencode-nix with local configs for fast iteration without having to build')]
 dev dir=".":
-    cd "{{dir}}" && OPENCODE_CONFIG="{{justfile_directory()}}/configs/default.json" OPENCODE_CONFIG_DIR="{{justfile_directory()}}/configs" "{{justfile_directory()}}/result/bin/opencode-nix"
+    cd "{{dir}}" && OPENCODE_CONFIG="{{justfile_directory()}}/configs/default.jsonc" OPENCODE_CONFIG_DIR="{{justfile_directory()}}/configs" "{{justfile_directory()}}/result/bin/opencode-nix"
 
 [doc('Update the flake lock file')]
 update:

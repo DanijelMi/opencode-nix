@@ -26,7 +26,8 @@
       lib = nixpkgs.lib;
       forEachSystem = lib.genAttrs supportedSystems;
       makeOpencodeNix = import ./lib/make-opencode-nix.nix;
-      defaultConfig = builtins.fromJSON (builtins.readFile ./configs/default.json);
+      stripJsonc = import ./lib/strip-jsonc.nix { inherit lib; };
+      defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ./configs/default.jsonc));
       defaultDcpConfig = builtins.fromJSON (builtins.readFile ./configs/dcp.json);
     in
     {
@@ -45,8 +46,14 @@
         in
         {
           default = self.packages.${system}.opencode-nix;
-          opencode-nix = makeOpencodeNix { inherit pkgs lib configDir; binaryName = "opencode-nix"; };
-          opencode = makeOpencodeNix { inherit pkgs lib configDir; binaryName = "opencode"; };
+          opencode-nix = makeOpencodeNix {
+            inherit pkgs lib configDir;
+            binaryName = "opencode-nix";
+          };
+          opencode = makeOpencodeNix {
+            inherit pkgs lib configDir;
+            binaryName = "opencode";
+          };
         }
       );
 

@@ -8,8 +8,9 @@
 let
   cfg = config.programs.opencode-nix;
   makeOpencodeNix = import ../lib/make-opencode-nix.nix;
+  stripJsonc = import ../lib/strip-jsonc.nix { inherit lib; };
   settingsFormat = pkgs.formats.json { };
-  defaultConfig = builtins.fromJSON (builtins.readFile ../configs/default.json);
+  defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ../configs/default.jsonc));
   defaultDcpConfig = builtins.fromJSON (builtins.readFile ../configs/dcp.json);
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.settings;
   mergedDcpConfig = lib.recursiveUpdate defaultDcpConfig cfg.dcpSettings;
@@ -74,6 +75,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ (makeOpencodeNix { inherit pkgs lib configDir; binaryName = cfg.binaryName; }) ];
+    home.packages = [
+      (makeOpencodeNix {
+        inherit pkgs lib configDir;
+        binaryName = cfg.binaryName;
+      })
+    ];
   };
 }
