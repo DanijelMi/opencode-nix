@@ -14,6 +14,10 @@ run dir=".":
 dev dir=".":
     cd "{{dir}}" && OPENCODE_CONFIG="{{justfile_directory()}}/config/config.jsonc" OPENCODE_CONFIG_DIR="{{justfile_directory()}}/config" "{{justfile_directory()}}/result/bin/opencode-nix"
 
+[doc('Format all Nix files')]
+fmt:
+    nix fmt
+
 [doc('Update the flake lock file')]
 update:
     nix flake update
