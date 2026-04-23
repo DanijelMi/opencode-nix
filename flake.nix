@@ -65,6 +65,8 @@
         };
       });
 
+      formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+
       devShells = forEachSystem (system: {
         default = nixpkgs.legacyPackages.${system}.mkShell {
           packages = [ self.packages.${system}.default ];

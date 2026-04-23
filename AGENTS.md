@@ -41,7 +41,7 @@ nix fmt
 
 Check formatting without applying changes:
 ```bash
-nix fmt -- --check
+nix fmt -- --fail-on-change
 ```
 
 Run static analysis with statix (if available):
