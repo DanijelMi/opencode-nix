@@ -138,6 +138,7 @@ in
 - Use relative paths for internal files: `./modules/home-manager.nix`
 - Use `builtins.readFile` for reading file contents
 - Use `builtins.fromJSON` for parsing JSON/JSONC files (strip comments with `strip-jsonc.nix` first for JSONC)
+- The `config/` directory mirrors `OPENCODE_CONFIG_DIR` exactly — `just dev` points directly at it
 
 #### Naming Conventions
 - Use kebab-case for option names: `programs.opencode-nix`
@@ -173,8 +174,12 @@ Example:
 .
 ├── flake.nix           # Main flake definition
 ├── flake.lock          # Locked dependencies
-├── configs/
-│   └── default.jsonc   # Default OpenCode configuration (JSONC with comments)
+├── config/             # OpenCode config dir (mirrors OPENCODE_CONFIG_DIR structure exactly)
+│   ├── config.jsonc    # Default OpenCode configuration (JSONC with comments)
+│   ├── dcp.json        # Default DCP plugin configuration
+│   └── skills/
+│       └── <name>/
+│           └── SKILL.md  # Bundled OpenCode agent skills
 ├── lib/
 │   ├── make-opencode-nix.nix # Shared package wrapping logic
 │   └── strip-jsonc.nix # JSONC comment stripping helper
@@ -224,6 +229,12 @@ Example:
 
 ## Common Tasks
 
+### Adding a New Skill
+1. Create `config/skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`, `compatibility: opencode`)
+2. The skill is automatically copied into `OPENCODE_CONFIG_DIR` at build time (see `flake.nix` and `modules/home-manager.nix`)
+3. No changes to Nix files are required — the `cp -r ${./config/skills}` line picks up all skills automatically
+4. Update README.md to document the new skill
+
 ### Adding a New Configuration Option
 1. Add option definition in `modules/home-manager.nix`
 2. Document with `description` and `example`
@@ -231,7 +242,7 @@ Example:
 4. Update README.md with usage example
 
 ### Updating Default Configuration
-1. Edit `configs/default.jsonc`
+1. Edit `config/config.jsonc`
 2. Validate by building: `just build`
 3. Test with `just dev`
 4. Update README.md if adding new features

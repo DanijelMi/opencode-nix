@@ -10,8 +10,8 @@ let
   makeOpencodeNix = import ../lib/make-opencode-nix.nix;
   stripJsonc = import ../lib/strip-jsonc.nix { inherit lib; };
   settingsFormat = pkgs.formats.json { };
-  defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ../configs/default.jsonc));
-  defaultDcpConfig = builtins.fromJSON (builtins.readFile ../configs/dcp.json);
+  defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ../config/config.jsonc));
+  defaultDcpConfig = builtins.fromJSON (builtins.readFile ../config/dcp.json);
   mergedConfig = lib.recursiveUpdate defaultConfig cfg.settings;
   mergedDcpConfig = lib.recursiveUpdate defaultDcpConfig cfg.dcpSettings;
   configFile = settingsFormat.generate "opencode-config.json" mergedConfig;
@@ -20,6 +20,7 @@ let
     mkdir -p $out
     cp ${configFile} $out/config.json
     cp ${dcpConfigFile} $out/dcp.json
+    cp -r ${../config/skills} $out/skills
   '';
 in
 {

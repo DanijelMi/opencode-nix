@@ -27,8 +27,8 @@
       forEachSystem = lib.genAttrs supportedSystems;
       makeOpencodeNix = import ./lib/make-opencode-nix.nix;
       stripJsonc = import ./lib/strip-jsonc.nix { inherit lib; };
-      defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ./configs/default.jsonc));
-      defaultDcpConfig = builtins.fromJSON (builtins.readFile ./configs/dcp.json);
+      defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ./config/config.jsonc));
+      defaultDcpConfig = builtins.fromJSON (builtins.readFile ./config/dcp.json);
     in
     {
       packages = forEachSystem (
@@ -42,6 +42,7 @@
             mkdir -p $out
             cp ${configFile} $out/config.json
             cp ${dcpConfigFile} $out/dcp.json
+            cp -r ${./config/skills} $out/skills
           '';
         in
         {
