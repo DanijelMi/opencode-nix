@@ -26,22 +26,16 @@
       lib = nixpkgs.lib;
       forEachSystem = lib.genAttrs supportedSystems;
       makeOpencodeNix = import ./lib/make-opencode-nix.nix;
-      stripJsonc = import ./lib/strip-jsonc.nix { inherit lib; };
-      defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ./config/config.jsonc));
-      defaultDcpConfig = builtins.fromJSON (builtins.readFile ./config/dcp.json);
     in
     {
       packages = forEachSystem (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          settingsFormat = pkgs.formats.json { };
-          configFile = settingsFormat.generate "opencode-config.json" defaultConfig;
-          dcpConfigFile = settingsFormat.generate "dcp.json" defaultDcpConfig;
           configDir = pkgs.runCommand "opencode-config-dir" { } ''
             mkdir -p $out
-            cp ${configFile} $out/config.json
-            cp ${dcpConfigFile} $out/dcp.json
+            cp ${./config/config.jsonc} $out/config.jsonc
+            cp ${./config/dcp.json} $out/dcp.json
             cp -r ${./config/skills} $out/skills
           '';
         in

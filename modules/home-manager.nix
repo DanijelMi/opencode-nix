@@ -8,18 +8,10 @@
 let
   cfg = config.programs.opencode-nix;
   makeOpencodeNix = import ../lib/make-opencode-nix.nix;
-  stripJsonc = import ../lib/strip-jsonc.nix { inherit lib; };
-  settingsFormat = pkgs.formats.json { };
-  defaultConfig = builtins.fromJSON (stripJsonc (builtins.readFile ../config/config.jsonc));
-  defaultDcpConfig = builtins.fromJSON (builtins.readFile ../config/dcp.json);
-  mergedConfig = lib.recursiveUpdate defaultConfig cfg.settings;
-  mergedDcpConfig = lib.recursiveUpdate defaultDcpConfig cfg.dcpSettings;
-  configFile = settingsFormat.generate "opencode-config.json" mergedConfig;
-  dcpConfigFile = settingsFormat.generate "dcp.json" mergedDcpConfig;
   configDir = pkgs.runCommand "opencode-config-dir" { } ''
     mkdir -p $out
-    cp ${configFile} $out/config.json
-    cp ${dcpConfigFile} $out/dcp.json
+    cp ${../config/config.jsonc} $out/config.jsonc
+    cp ${../config/dcp.json} $out/dcp.json
     cp -r ${../config/skills} $out/skills
   '';
 in
@@ -49,39 +41,6 @@ in
         The name of the installed binary.
         Use "opencode-nix" (default) to avoid conflicts with pkgs.opencode if both are installed.
         Use "opencode" to match the upstream binary name.
-      '';
-    };
-
-    settings = lib.mkOption {
-      type = settingsFormat.type;
-      default = { };
-      example = {
-        mcp = {
-          my-custom-mcp = {
-            type = "remote";
-            url = "https://my-mcp.example.com/mcp";
-          };
-        };
-      };
-      description = ''
-        Additional opencode configuration settings to merge with the defaults.
-        These will be deep-merged with the base configuration.
-      '';
-    };
-
-    dcpSettings = lib.mkOption {
-      type = settingsFormat.type;
-      default = { };
-      example = {
-        compress = {
-          maxContextLimit = 200000;
-        };
-      };
-      description = ''
-        Additional DCP configuration settings to merge with the defaults.
-        These will be deep-merged with the base DCP configuration from configs/dcp.json.
-        See https://github.com/Opencode-DCP/opencode-dynamic-context-pruning#configuration
-        for all available options.
       '';
     };
   };

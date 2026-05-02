@@ -10,10 +10,6 @@ A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://gith
 nix run github:DanijelMi/opencode-nix
 ```
 
-```bash
-nix run github:DanijelMi/opencode-nix
-```
-
 #### Customising the config directory name
 
 By default, opencode-nix stores its writable config at `~/.config/opencode-nix/`. You can
@@ -123,31 +119,6 @@ For fast iteration while modifying this flake locally, use a path input instead 
 opencode-nix.url = "path:/home/username/repos/opencode-nix";
 ```
 
-### Extending configuration
-
-You can add additional MCP servers, override opencode settings, or adjust DCP behaviour:
-
-```nix
-programs.opencode-nix = {
-  enable = true;
-  settings = {
-    mcp = {
-      my-custom-mcp = {
-        type = "remote";
-        url = "https://my-mcp.example.com/mcp";
-      };
-    };
-  };
-  dcpSettings = {
-    compress = {
-      maxContextLimit = 200000;
-    };
-  };
-};
-```
-
-`settings` and `dcpSettings` are each deep-merged with their respective default configurations.
-
 ## Default Configuration
 
 The default config includes:
@@ -155,7 +126,7 @@ The default config includes:
 - **context7 MCP** — documentation search for any library
 - **nixos MCP** — search NixOS packages, options, and documentation (`mcp-nixos` is bundled automatically)
 - **opencode-notifier** (`@mohak34/opencode-notifier`) — desktop notifications for long-running tasks
-- **opencode-claude-auth** (`opencode-claude-auth`) — streamlines Claude API authentication via OAuth; no API key required
+- **opencode-anthropic-oauth** (`opencode-anthropic-oauth`) — streamlines Anthropic API authentication via OAuth; no API key required
 - **DCP** (`@tarquinen/opencode-dcp`) — intelligent context compression and pruning
 
 ```json
@@ -163,7 +134,7 @@ The default config includes:
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
     "@mohak34/opencode-notifier@latest",
-    "opencode-claude-auth@latest",
+    "opencode-anthropic-oauth@latest",
     "@tarquinen/opencode-dcp@latest"
   ],
   "mcp": {
@@ -178,18 +149,6 @@ The default config includes:
   }
 }
 ```
-
-### DCP Configuration
-
-A default DCP configuration is provided at `configs/dcp.json` and installed via `OPENCODE_CONFIG_DIR`. Key defaults:
-
-- **Compress mode**: `range` — compresses conversation spans into summaries
-- **Permission**: `allow` — no confirmation prompt for compression
-- **Deduplication**: enabled — removes duplicate tool call outputs
-- **Purge errors**: enabled — prunes errored tool inputs after 4 turns
-- **Notifications**: detailed chat notifications
-
-When using the Home Manager module, DCP settings can be overridden declaratively via the `dcpSettings` option (see above). Alternatively, override at the project level (`.opencode/dcp.json`) or globally (`~/.config/opencode/dcp.jsonc`). See the [DCP documentation](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning#configuration) for all options.
 
 ## Overlay
 
