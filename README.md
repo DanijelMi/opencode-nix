@@ -25,6 +25,21 @@ nix run github:DanijelMi/opencode-nix
 nix run github:DanijelMi/opencode-nix#opencode
 ```
 
+#### Customising the config directory name
+
+By default, opencode-nix stores its writable config at `~/.config/opencode-nix/`. You can
+override the directory name at runtime with `OPENCODE_NIX_DIR_NAME`:
+
+```bash
+OPENCODE_NIX_DIR_NAME=opencode-test nix run github:DanijelMi/opencode-nix
+```
+
+Set it in your shell profile to make it permanent:
+
+```bash
+export OPENCODE_NIX_DIR_NAME=opencode-test
+```
+
 ### Dev shell
 
 ```bash
@@ -96,6 +111,20 @@ programs.opencode-nix = {
 ```
 
 > **Note:** `binaryName = "opencode"` will conflict with `pkgs.opencode` if both are installed.
+
+#### Customising the config directory name
+
+By default, opencode-nix stores its writable config at `~/.config/opencode-nix/`. You can
+change the directory name:
+
+```nix
+programs.opencode-nix = {
+  enable = true;
+  configDirName = "opencode-test";
+};
+```
+
+This is useful if you want separate config directories for different profiles or installations.
 
 #### Development tip: local path
 

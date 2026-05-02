@@ -5,6 +5,7 @@
   lib,
   configDir,
   binaryName ? "opencode-nix",
+  configDirName ? "opencode-nix",
 }:
 let
   # Shell preamble that syncs static config files from the Nix store into a
@@ -21,7 +22,7 @@ let
   #     set in the environment, so `just dev` overrides continue to work.
   preamble = ''
     _oc_nix_store_config="${configDir}"
-    _oc_config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/opencode-nix"
+    _oc_config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/''${OPENCODE_NIX_DIR_NAME:-${configDirName}}"
     _oc_sentinel="$_oc_config_dir/.nix-store-path"
 
     if [ "$(cat "$_oc_sentinel" 2>/dev/null)" != "$_oc_nix_store_config" ]; then
