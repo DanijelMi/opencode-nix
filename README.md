@@ -125,30 +125,9 @@ The default config includes:
 
 - **context7 MCP** — documentation search for any library
 - **nixos MCP** — search NixOS packages, options, and documentation (`mcp-nixos` is bundled automatically)
-- **opencode-notifier** (`@mohak34/opencode-notifier`) — desktop notifications for long-running tasks
+- **opencode-notifier** (`@mohak34/opencode-notifier`) — sound and desktop notifications when done
 - **opencode-anthropic-oauth** (`opencode-anthropic-oauth`) — streamlines Anthropic API authentication via OAuth; no API key required
 - **DCP** (`@tarquinen/opencode-dcp`) — intelligent context compression and pruning
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "plugin": [
-    "@mohak34/opencode-notifier@latest",
-    "opencode-anthropic-oauth@latest",
-    "@tarquinen/opencode-dcp@latest"
-  ],
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "nixos": {
-      "type": "local",
-      "command": ["mcp-nixos"]
-    }
-  }
-}
-```
 
 ## Overlay
 
