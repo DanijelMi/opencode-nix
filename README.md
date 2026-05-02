@@ -10,19 +10,8 @@ A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://gith
 nix run github:DanijelMi/opencode-nix
 ```
 
-Two package variants are available:
-
-| Package | Binary name | Use when |
-|---|---|---|
-| `opencode-nix` (default) | `opencode-nix` | Both this flake and `pkgs.opencode` are installed |
-| `opencode` | `opencode` | This flake is the only opencode installation |
-
 ```bash
-# default (opencode-nix binary)
 nix run github:DanijelMi/opencode-nix
-
-# opencode binary name
-nix run github:DanijelMi/opencode-nix#opencode
 ```
 
 #### Customising the config directory name
