@@ -50,5 +50,10 @@ pkgs.runCommand "${binaryName}-${pkgs.opencode.version or "unstable"}"
     mkdir -p $out/bin
     makeWrapper ${lib.getExe pkgs.opencode} $out/bin/${binaryName} \
       --run ${lib.escapeShellArg preamble} \
-      --prefix PATH : ${lib.makeBinPath [ pkgs.mcp-nixos ]}
+      --prefix PATH : ${
+        lib.makeBinPath [
+          pkgs.mcp-nixos
+          pkgs.mcp-grafana
+        ]
+      }
   ''

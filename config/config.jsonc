@@ -22,6 +22,12 @@
       "command": [
         "mcp-nixos"
       ]
+    },
+    "grafana": {
+      "type": "local",
+      "command": [
+        "mcp-grafana"
+      ]
     }
   }
 }
