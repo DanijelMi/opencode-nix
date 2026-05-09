@@ -1,6 +1,6 @@
 # opencode-nix
 
-A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://github.com/upstash/context7) and [Dynamic Context Pruning](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning) pre-configured.
+A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://github.com/upstash/context7), [Grafana MCP](https://github.com/grafana/mcp-grafana), and [Dynamic Context Pruning](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning) pre-configured.
 
 ## Usage
 
@@ -125,6 +125,7 @@ The default config includes:
 
 - **context7 MCP** — documentation search for any library
 - **nixos MCP** — search NixOS packages, options, and documentation (`mcp-nixos` is bundled automatically)
+- **grafana MCP** — interact with Grafana dashboards, Prometheus, Loki, alerting, incidents, and more (`mcp-grafana` is bundled automatically; requires `GRAFANA_URL` and `GRAFANA_SERVICE_ACCOUNT_TOKEN` to be set in your environment)
 - **opencode-notifier** (`@mohak34/opencode-notifier`) — sound and desktop notifications when done
 - **opencode-anthropic-oauth** (`opencode-anthropic-oauth`) — streamlines Anthropic API authentication via OAuth; no API key required
 - **DCP** (`@tarquinen/opencode-dcp`) — intelligent context compression and pruning
