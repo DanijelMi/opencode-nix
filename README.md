@@ -1,6 +1,6 @@
 # opencode-nix
 
-A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://github.com/upstash/context7), [Grafana MCP](https://github.com/grafana/mcp-grafana), and [Dynamic Context Pruning](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning) pre-configured.
+A Nix flake for [OpenCode](https://opencode.ai) with [context7 MCP](https://github.com/upstash/context7), [Grafana MCP](https://github.com/grafana/mcp-grafana), [GitLab MCP](https://github.com/zereight/gitlab-mcp), [Atlassian MCP](https://github.com/sooperset/mcp-atlassian), and [Dynamic Context Pruning](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning) pre-configured.
 
 ## Usage
 
@@ -126,6 +126,8 @@ The default config includes:
 - **context7 MCP** — documentation search for any library
 - **nixos MCP** — search NixOS packages, options, and documentation (`mcp-nixos` is bundled automatically)
 - **grafana MCP** — interact with Grafana dashboards, Prometheus, Loki, alerting, incidents, and more (`mcp-grafana` is bundled automatically; requires `GRAFANA_URL` and `GRAFANA_SERVICE_ACCOUNT_TOKEN` to be set in your environment)
+- **gitlab MCP** (`@zereight/mcp-gitlab`) — 153 tools for GitLab repositories, issues, MRs, pipelines, and more; requires `GITLAB_PERSONAL_ACCESS_TOKEN` and `GITLAB_API_URL` (self-hosted) to be set in your environment
+- **atlassian MCP** (`mcp-atlassian`) — 72 tools for Jira and Confluence (Cloud and Server/Data Center); requires `JIRA_URL`, `JIRA_USERNAME`, `JIRA_API_TOKEN`, `CONFLUENCE_URL`, `CONFLUENCE_USERNAME`, and `CONFLUENCE_API_TOKEN` to be set in your environment (use `JIRA_PERSONAL_TOKEN` / `CONFLUENCE_PERSONAL_TOKEN` instead for Server/Data Center)
 - **opencode-notifier** (`@mohak34/opencode-notifier`) — sound and desktop notifications when done
 - **opencode-anthropic-oauth** (`opencode-anthropic-oauth`) — streamlines Anthropic API authentication via OAuth; no API key required
 - **DCP** (`@tarquinen/opencode-dcp`) — intelligent context compression and pruning
