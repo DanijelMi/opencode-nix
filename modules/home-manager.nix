@@ -8,12 +8,6 @@
 let
   cfg = config.programs.opencode-nix;
   makeOpencodeNix = import ../lib/make-opencode-nix.nix;
-  configDir = pkgs.runCommand "opencode-config-dir" { } ''
-    mkdir -p $out
-    cp ${../config/config.jsonc} $out/config.jsonc
-    cp ${../config/dcp.json} $out/dcp.json
-    cp -r ${../config/skills} $out/skills
-  '';
 in
 {
   options.programs.opencode-nix = {
@@ -43,14 +37,47 @@ in
         Use "opencode" to match the upstream binary name.
       '';
     };
+
+    enabledMcps = lib.mkOption {
+      type = lib.types.listOf (lib.types.enum [
+        "context7"
+        "nixos"
+        "grafana"
+        "gitlab"
+        "atlassian"
+      ]);
+      default = [
+        "context7"
+        "grafana"
+        "gitlab"
+        "atlassian"
+      ];
+      example = [
+        "context7"
+        "nixos"
+      ];
+      description = ''
+        List of MCP servers to enable. Defaults to all available MCPs except
+        "nixos" (which requires a running NixOS or nixpkgs evaluation context
+        and is expensive to start).
+
+        Available MCPs:
+        - "context7"  — remote MCP for library documentation lookup
+        - "nixos"     — local MCP for NixOS/nixpkgs queries (bundled binary)
+        - "grafana"   — local MCP for Grafana dashboards (bundled binary)
+        - "gitlab"    — on-demand MCP for GitLab (via npx)
+        - "atlassian" — on-demand MCP for Jira/Confluence (via uvx)
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
     home.packages = [
       (makeOpencodeNix {
-        inherit pkgs lib configDir;
+        inherit pkgs lib;
         binaryName = cfg.binaryName;
         configDirName = cfg.configDirName;
+        enabledMcps = cfg.enabledMcps;
       })
     ];
   };

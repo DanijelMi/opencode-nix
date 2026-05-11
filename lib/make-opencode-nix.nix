@@ -3,11 +3,111 @@
 {
   pkgs,
   lib,
-  configDir,
   binaryName ? "opencode-nix",
   configDirName ? "opencode-nix",
+  enabledMcps ? [
+    "context7"
+    "grafana"
+    "gitlab"
+    "atlassian"
+  ],
 }:
 let
+  # All available MCP server definitions.
+  allMcps = {
+    context7 = {
+      type = "remote";
+      url = "https://mcp.context7.com/mcp";
+    };
+    nixos = {
+      type = "local";
+      command = [ "mcp-nixos" ];
+    };
+    grafana = {
+      type = "local";
+      command = [ "mcp-grafana" ];
+    };
+    gitlab = {
+      type = "local";
+      command = [
+        "npx"
+        "-y"
+        "@zereight/mcp-gitlab"
+      ];
+      environment = {
+        GITLAB_PERSONAL_ACCESS_TOKEN = "{env:GITLAB_PERSONAL_ACCESS_TOKEN}";
+        GITLAB_API_URL = "{env:GITLAB_API_URL}";
+      };
+    };
+    atlassian = {
+      type = "local";
+      command = [
+        "uvx"
+        "mcp-atlassian"
+      ];
+      environment = {
+        JIRA_URL = "{env:JIRA_URL}";
+        JIRA_USERNAME = "{env:JIRA_USERNAME}";
+        JIRA_API_TOKEN = "{env:JIRA_API_TOKEN}";
+        CONFLUENCE_URL = "{env:CONFLUENCE_URL}";
+        CONFLUENCE_USERNAME = "{env:CONFLUENCE_USERNAME}";
+        CONFLUENCE_API_TOKEN = "{env:CONFLUENCE_API_TOKEN}";
+      };
+    };
+  };
+
+  filteredMcps = lib.filterAttrs (name: _: builtins.elem name enabledMcps) allMcps;
+
+  # Binaries that need to be on PATH for bundled local MCPs.
+  mcpBinPaths =
+    lib.optional (builtins.elem "nixos" enabledMcps) pkgs.mcp-nixos
+    ++ lib.optional (builtins.elem "grafana" enabledMcps) pkgs.mcp-grafana;
+
+  # Compact MCP JSON — jq pretty-prints it during configDir assembly.
+  mcpJson = pkgs.writeText "mcps.json" (builtins.toJSON filteredMcps);
+
+  configDir = pkgs.runCommand "opencode-config-dir" {
+    nativeBuildInputs = [ pkgs.jq ];
+  } ''
+    mkdir -p $out
+
+    # Write the static header (schema, models, plugins) including the JSONC
+    # comment. Single-quoted heredoc delimiter prevents shell expansion of
+    # "$schema" and similar tokens.
+    cat > $out/config.jsonc <<'HEADER'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "small_model": "anthropic/claude-haiku-4-5",
+  "agent": {
+    "explore": {
+      "model": "anthropic/claude-haiku-4-5"
+    },
+    "build": {
+      "prompt": "When you need a scratch directory for temporary files or intermediate build artifacts, use /tmp/opencode/ — it is pre-approved and does not require a permission prompt."
+    }
+  },
+  "plugin": [
+    "@mohak34/opencode-notifier@latest",
+    // "opencode-claude-auth@latest",
+    "@tarquinen/opencode-dcp@latest",
+    "opencode-anthropic-oauth@latest"
+  ],
+HEADER
+
+    # Append "mcp": followed by the pretty-printed, properly-indented MCP JSON.
+    # jq formats the object; sed adds 2-space indent to every line after the
+    # opening "{" so the content nests correctly inside the outer object.
+    printf '  "mcp": ' >> $out/config.jsonc
+    ${pkgs.jq}/bin/jq '.' ${mcpJson} \
+      | sed '2,$ s/^/  /' >> $out/config.jsonc
+
+    # Append the outer closing brace.
+    printf '}\n' >> $out/config.jsonc
+
+    cp ${../config/dcp.json} $out/dcp.json
+    cp -r ${../config/skills} $out/skills
+  '';
+
   # Shell preamble that syncs static config files from the Nix store into a
   # writable directory (~/.config/opencode-nix/) before exec'ing opencode.
   #
@@ -50,10 +150,5 @@ pkgs.runCommand "${binaryName}-${pkgs.opencode.version or "unstable"}"
     mkdir -p $out/bin
     makeWrapper ${lib.getExe pkgs.opencode} $out/bin/${binaryName} \
       --run ${lib.escapeShellArg preamble} \
-      --prefix PATH : ${
-        lib.makeBinPath [
-          pkgs.mcp-nixos
-          pkgs.mcp-grafana
-        ]
-      }
+      ${lib.optionalString (mcpBinPaths != [ ]) "--prefix PATH : ${lib.makeBinPath mcpBinPaths}"}
   ''

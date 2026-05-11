@@ -32,21 +32,15 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          configDir = pkgs.runCommand "opencode-config-dir" { } ''
-            mkdir -p $out
-            cp ${./config/config.jsonc} $out/config.jsonc
-            cp ${./config/dcp.json} $out/dcp.json
-            cp -r ${./config/skills} $out/skills
-          '';
         in
         {
           default = self.packages.${system}.opencode-nix;
           opencode-nix = makeOpencodeNix {
-            inherit pkgs lib configDir;
+            inherit pkgs lib;
             binaryName = "opencode-nix";
           };
           opencode = makeOpencodeNix {
-            inherit pkgs lib configDir;
+            inherit pkgs lib;
             binaryName = "opencode";
           };
         }
